@@ -30,6 +30,19 @@ function test_path()
   assert(path:basename('/abc/def') == 'def', "Basename of two-level path is incorrect.")
   assert(path:basename('/abc') == '/abc', "Basename of one-level absolute path is incorrect.")
   assert(path:basename('abc') == 'abc', "Basename of one-level relative path is incorrect.")
+  
+  local path = Path()
+  assert(path:normpath('/abc') == '/abc', "Normalization of one-level path is incorrect.")
+  assert(path:normpath('/abc/def') == '/abc/def', "Normalization of two-level path is incorrect.")
+  assert(path:normpath('/abc/def/ghi') == '/abc/def/ghi', "Normalization of three-level path is incorrect.")
+  assert(path:normpath('/') == '/', "Normalization of root path is incorrect.")
+  assert(path:normpath('/abc/def/..') == '/abc', "Normalization of trailing '..' path is incorrect.")
+  assert(path:normpath('/abc/def/../ghi') == '/abc/ghi', "Normalization of middle '..' path is incorrect.")
+  assert(path:normpath('/abc/../def/../ghi') == '/ghi', "Normalization of multiple '..' path is incorrect.")
+  assert(path:normpath('/abc/../../../def/../ghi') == '/ghi', "Normalization of too many '..' path is incorrect.")
+  assert(path:normpath('abc/../def/../ghi') == 'ghi', "Normalization of simple relative '..' path is incorrect.")
+  print(path:normpath('abc/../../../def/../ghi'))
+  assert(path:normpath('abc/../../../def/../ghi') == '../../ghi', "Normalization of complex relative '..' path is incorrect.")
 end
 
 

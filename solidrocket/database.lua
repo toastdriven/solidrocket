@@ -1,5 +1,4 @@
-require("luarocks.loader")
-require("posix")
+require("solidrocket/utils/path")
 
 
 __author__ = 'Daniel Lindsley'
