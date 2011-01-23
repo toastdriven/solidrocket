@@ -1,3 +1,5 @@
+require("luarocks.loader")
+require("posix")
 require("solidrocket/utils/path")
 
 
@@ -41,8 +43,12 @@ function test_path()
   assert(path:normpath('/abc/../def/../ghi') == '/ghi', "Normalization of multiple '..' path is incorrect.")
   assert(path:normpath('/abc/../../../def/../ghi') == '/ghi', "Normalization of too many '..' path is incorrect.")
   assert(path:normpath('abc/../def/../ghi') == 'ghi', "Normalization of simple relative '..' path is incorrect.")
-  print(path:normpath('abc/../../../def/../ghi'))
   assert(path:normpath('abc/../../../def/../ghi') == '../../ghi', "Normalization of complex relative '..' path is incorrect.")
+  
+  local path = Path()
+  current_cwd = posix.getcwd()
+  abs_path = current_cwd .. '/abc/def'
+  assert(path:abspath('abc/def') == abs_path, "Building absolute path is incorrect.")
 end
 
 

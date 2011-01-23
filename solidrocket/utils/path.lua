@@ -88,25 +88,41 @@ function Path(path_separator)
   function _path:normpath(path)
     local bits = self:split(path)
     local normed = {}
-    local started_at_root = false
+    local is_absolute = false
     
     if string.sub(path, 1, 1) == self.path_separator then
-      started_at_root = true
+      is_absolute = true
     end
     
     for i, v in ipairs(bits) do
-      if v == '..' then
-        -- Can't go higher than the root.
-        if #normed > 0 then
-          if normed[#normed] == '..' then
-            table.insert(normed, v)
+      if not (v == '..' or v == '.') then
+        -- If it's a regular path item, append it.
+        table.insert(normed, v)
+      else
+        -- We're dealing with a path modifier.
+        if v == '.' then
+          -- We can just ignore '.'s.
+        elseif v == '..' then
+          -- Ensure we're not trying to remove things from an empty table.
+          if #normed > 0 then
+            if not (normed[#normed] == '..') then
+              -- Pop off the last thing we pushed in.
+              table.remove(normed)
+            else
+              if not is_absolute then
+                -- If not an absolute URL, we need to shove in all of the '..'s
+                -- to correct walk up the tree.
+                table.insert(normed, v)
+              end
+            end
           else
-            -- Pop off the last thing we pushed in.
-            table.remove(normed)
+            if not is_absolute then
+              -- This hurts but we do the same logic here to make sure we're
+              -- not shoving in '..'s that try to go above the root.
+              table.insert(normed, v)
+            end
           end
         end
-      else
-        table.insert(normed, v)
       end
     end
     
@@ -116,7 +132,7 @@ function Path(path_separator)
     
     normed_path = self:join(normed)
     
-    if started_at_root then
+    if is_absolute then
       if not (string.sub(normed_path, 1, 1) == self.path_separator) then
         normed_path = self.path_separator .. normed_path
       end
@@ -126,7 +142,7 @@ function Path(path_separator)
   end
   
   function _path:abspath(path)
-    return self:normpath(self:join(self.getcwd(), path))
+    return self:normpath(self:join({self.getcwd(), path}))
   end
   
   -- Wrap some common posix bits.
