@@ -1,6 +1,7 @@
 require("luarocks.loader")
 require("posix")
 require("solidrocket/utils/path")
+require("solidrocket/utils/text")
 
 
 function test_path()
@@ -18,7 +19,6 @@ function test_path()
   local path = Path()
   assert(#path:split('abc') == 1, "Bits of a single element path is incorrect.")
   assert(#path:split('abc/def') == 2, "Bits of a two element path is incorrect.")
-  -- for i,v in ipairs(path:bits('/abc/def')) do print(i,v) end
   assert(#path:split('/abc/def') == 2, "Bits of an absolute two element path is incorrect.")
   
   local path = Path()
@@ -46,10 +46,33 @@ function test_path()
   assert(path:normpath('abc/../../../def/../ghi') == '../../ghi', "Normalization of complex relative '..' path is incorrect.")
   
   local path = Path()
-  current_cwd = posix.getcwd()
-  abs_path = current_cwd .. '/abc/def'
+  local current_cwd = posix.getcwd()
+  local abs_path = current_cwd .. '/abc/def'
   assert(path:abspath('abc/def') == abs_path, "Building absolute path is incorrect.")
 end
 
 
+function test_text()
+  assert(text.split('abc')[1] == 'abc', "Single word text split is incorrect.")
+  assert(text.split('abc def')[1] == 'abc', "First word of a two-word text split is incorrect.")
+  assert(text.split('abc def')[2] == 'def', "Second word of a two-word text split is incorrect.")
+  assert(text.split('abc def ghi')[1] == 'abc', "First word of a three-word text split is incorrect.")
+  assert(text.split('abc def ghi')[2] == 'def', "Second word of a three-word text split is incorrect.")
+  assert(text.split('abc def ghi')[3] == 'ghi', "Third word of a three-word text split is incorrect.")
+  assert(text.split('abc def/ghi')[1] == 'abc', "First word of a two-word-special-character text split is incorrect.")
+  assert(text.split('abc def/ghi')[2] == 'def/ghi', "Second word of a two-word-special-character text split is incorrect.")
+  assert(text.split('abc def/ghi', '/')[1] == 'abc def', "First word of an overridden two-word-special-character text split is incorrect.")
+  assert(text.split('abc def/ghi', '/')[2] == 'ghi', "Second word of an overridden two-word-special-character text split is incorrect.")
+  
+  assert(text.slugify('abc') == 'abc', "Single word slugify is incorrect.")
+  assert(text.slugify('abc def') == 'abc-def', "Space-handling slugify is incorrect.")
+  assert(text.slugify('abc_def') == 'abc_def', "Underscore-handling slugify is incorrect.")
+  assert(text.slugify('abc.def') == 'abc.def', "Period-handling slugify is incorrect.")
+  assert(text.slugify('AaBbCc_DdEeFf') == 'aabbcc_ddeeff', "Mixed-case-handling slugify is incorrect.")
+  assert(text.slugify('a#$%b_-c(*$).\\d{e>f') == 'ab_-c.def', "Multi-character-handling slugify is incorrect.")
+  assert(text.slugify('abc/../../../etc/passwd') == 'abc......etcpasswd', "Attempted path-manipulation of slugify is incorrect.")
+end
+
+
 test_path()
+test_text()
