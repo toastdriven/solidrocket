@@ -145,21 +145,39 @@ function Path(path_separator)
     return self:normpath(self:join({self.getcwd(), path}))
   end
   
+  function _path:makedirs(path)
+    -- Makes all directories needed to generate the final path.
+    -- FIXME: Cheap hack, because doing this the right way will take more time
+    --        and only benefits Windows.
+    return os.execute('mkdir -p ' .. path)
+  end
+  
+  function _path:rmtree(path)
+    -- Remove all directories & files under a given path.
+    -- FIXME: Cheap hack, because doing this the right way will take more time
+    --        and only benefits Windows.
+    return os.execute('rm -rf ' .. path)
+  end
+  
   -- Wrap some common posix bits.
   function _path:exists(path)
-    return posix.access(path, "f")
+    status, errstr, errno = posix.access(path, "f")
+    return status == 0
   end
   
   function _path:access(path, mode)
-    return posix.access(path, mode)
+    status, errstr, errno = posix.access(path, mode)
+    return status == 0
   end
   
   function _path:can_read(path)
-    return posix.access(path, "r")
+    status, errstr, errno = posix.access(path, "r")
+    return status == 0
   end
   
   function _path:can_write(path)
-    return posix.access(path, "w")
+    status, errstr, errno = posix.access(path, "w")
+    return status == 0
   end
   
   function _path:getcwd()
