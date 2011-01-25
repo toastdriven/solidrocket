@@ -2,8 +2,8 @@ require("solidrocket/utils/path")
 require("solidrocket/utils/text")
 
 
-__author__ = 'Daniel Lindsley'
-__version__ = {0, 0, 1, 'alpha'}
+local __author__ = 'Daniel Lindsley'
+local __version__ = {0, 0, 1, 'alpha'}
 
 
 function Database(root_path, database_name)
