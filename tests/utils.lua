@@ -47,7 +47,7 @@ function test_path()
   
   local path = Path()
   local current_cwd = posix.getcwd()
-  local abs_path = current_cwd .. '/abc/def'
+  local abs_path = string.format('%s/abc/def', current_cwd)
   assert(path:abspath('abc/def') == abs_path, "Building absolute path is incorrect.")
 end
 

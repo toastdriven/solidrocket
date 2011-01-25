@@ -23,7 +23,7 @@ function Path(path_separator)
     path = table.remove(data, 1)
     
     for _, item in ipairs(data) do
-      path = path .. self.path_separator .. item
+      path = string.format("%s%s%s", path, self.path_separator, item)
     end
     
     return path
@@ -134,7 +134,7 @@ function Path(path_separator)
     
     if is_absolute then
       if not (string.sub(normed_path, 1, 1) == self.path_separator) then
-        normed_path = self.path_separator .. normed_path
+        normed_path = string.format("%s%s", self.path_separator, normed_path)
       end
     end
     
@@ -149,14 +149,14 @@ function Path(path_separator)
     -- Makes all directories needed to generate the final path.
     -- FIXME: Cheap hack, because doing this the right way will take more time
     --        and only benefits Windows.
-    return os.execute('mkdir -p ' .. path)
+    return os.execute(string.format('mkdir -p %s', path)) == 0
   end
   
   function _path:rmtree(path)
     -- Remove all directories & files under a given path.
     -- FIXME: Cheap hack, because doing this the right way will take more time
     --        and only benefits Windows.
-    return os.execute('rm -rf ' .. path)
+    return os.execute(string.format('rm -rf %s', path)) == 0
   end
   
   -- Wrap some common posix bits.
