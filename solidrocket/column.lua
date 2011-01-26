@@ -25,6 +25,21 @@ function Column(bucket, column_name)
     return self.column_path
   end
   
+  function column:deserialize_type(raw_data)
+    if raw_data == 'nil' then
+      return nil
+    elseif raw_data == 'true' then
+      return true
+    elseif raw_data == 'false' then
+      return false
+    elseif string.match(raw_data, "^%d+$") then
+      return tonumber(raw_data)
+    end
+    
+    -- Still a string.
+    return raw_data
+  end
+  
   function column:get(original_id)
     -- FIXME: Inefficient, but for now we'll iterate over everything until
     --        we find the key. MapReduce FTL.
@@ -38,7 +53,7 @@ function Column(bucket, column_name)
       
       if id then
         if original_id == id then
-          final_value = value
+          final_value = self:deserialize_type(value)
         end
       end
     end
