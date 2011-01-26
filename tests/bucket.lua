@@ -53,15 +53,60 @@ context("solidrocket", function()
     end)
     
     test("naming", function()
-      -- Test bucket name modifications.
-      local b4 = Bucket(db, 'bucket1')
-      assert_equal(b4:clean_bucket_name(), 'bucket1')
+      -- Test bucket name checks.
+      local b1 = Bucket(db, 'bucket1')
+      assert_true(b1:check_bucket_name())
       
-      b4.bucket_name = 'test_some-special.chars'
-      assert_equal(b4:clean_bucket_name(), 'test_some-special.chars')
+      b1.bucket_name = 'test_some-special.chars'
+      assert_true(b1:check_bucket_name())
       
-      b4.bucket_name = 'test/../some/.../invalid#char$'
-      assert_equal(b4:clean_bucket_name(), 'test..some...invalidchar')
+      b1.bucket_name = 'test/../some/.../invalid#char$'
+      assert_false(b1:check_bucket_name())
+    end)
+    
+    test("generate_id", function()
+      local b1 = Bucket(db, 'bucket1')
+      local uuid1 = b1:generate_id()
+      local uuid2 = b1:generate_id()
+      assert_not_equal(uuid1, '')
+      assert_not_equal(uuid2, '')
+      assert_not_equal(uuid1, uuid2)
+    end)
+    
+    test("get and put", function()
+      local b1 = Bucket(db, 'bucket1')
+      assert_false(path:exists(path:join({b1:path(), 'username.db'})))
+      assert_false(path:exists(path:join({b1:path(), 'age.db'})))
+      assert_false(path:exists(path:join({b1:path(), 'is_active.db'})))
+      
+      local user_id1 = b1:put(nil, {
+        username='daniel',
+        age=28,
+        is_active=true
+      })
+      
+      assert_true(path:exists(path:join({b1:path(), 'username.db'})))
+      assert_true(path:exists(path:join({b1:path(), 'age.db'})))
+      assert_true(path:exists(path:join({b1:path(), 'is_active.db'})))
+      
+      -- Test the case where we supply an id.
+      local user_id2 = b1:put('joeschmoe', {
+        username='joe',
+        age=35,
+        is_active=false
+      })
+      
+      assert_equal(user_id2, 'joeschmoe')
+      
+      local user1 = b1:get(user_id1, {'username', 'age', 'is_active'})
+      assert_equal(user1['username'], 'daniel')
+      assert_equal(user1['age'], '28')
+      assert_equal(user1['is_active'], 'true')
+      
+      local user2 = b1:get(user_id2, {'username', 'is_active'})
+      assert_equal(user2['username'], 'joe')
+      assert_equal(user2['age'], nil)
+      assert_equal(user2['is_active'], 'false')
     end)
   end)
 end)

@@ -34,3 +34,13 @@ function text.slugify(original)
   new_string, count = string.gsub(altered, '[^a-z0-9_.-]', '')
   return new_string
 end
+
+function text.check_key(original)
+  local matched = string.match(original, "^[%w_.-]+$")
+  
+  if not matched then
+    return false
+  else
+    return true
+  end
+end

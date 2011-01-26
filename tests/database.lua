@@ -49,15 +49,15 @@ context("solidrocket", function()
     end)
     
     test("naming", function()
-      -- Test database name modifications.
+      -- Test database name checks.
       local db4 = Database(database_root, 'test1')
-      assert_equal(db4:clean_database_name(), 'test1')
+      assert_true(db4:check_database_name())
       
       db4.database_name = 'test_some-special.chars'
-      assert_equal(db4:clean_database_name(), 'test_some-special.chars')
+      assert_true(db4:check_database_name())
       
       db4.database_name = 'test/../some/.../invalid#char$'
-      assert_equal(db4:clean_database_name(), 'test..some...invalidchar')
+      assert_false(db4:check_database_name())
     end)
   end)
 end)

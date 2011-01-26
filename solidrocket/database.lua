@@ -13,15 +13,17 @@ function Database(root_path, database_name)
     _path=Path(),
   }
   
-  function database:clean_database_name()
-    -- Slugify the name so as not to allow attacks on files outside the
-    -- database root.
-    return text.slugify(self.database_name)
+  function database:check_database_name()
+    return text.check_key(self.database_name)
   end
   
   function database:path()
+    if not self:check_database_name() then
+      error(string.format("Invalid database name '%q' provided.", self.database_name))
+    end
+    
     if not self.database_path then
-      self.database_path = self._path:join({self.root_path, self:clean_database_name()})
+      self.database_path = self._path:join({self.root_path, self.database_name})
     end
     
     return self.database_path
